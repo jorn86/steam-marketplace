@@ -11,7 +11,7 @@ object App {
     private val log = LoggerFactory.getLogger(javaClass)
 
     fun run() {
-        val selenium = SeleniumService().apply { start() }
+        val selenium = SeleniumService("./chrome-profiles/steam-marketplace").apply { start() }
         Runtime.getRuntime().addShutdownHook(Thread { selenium.stop() })
 
         val accountId = LoginAction(selenium).invoke()

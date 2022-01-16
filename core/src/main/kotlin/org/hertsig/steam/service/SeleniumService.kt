@@ -9,7 +9,10 @@ import java.time.temporal.ChronoUnit
 import kotlin.io.path.Path
 import kotlin.io.path.absolutePathString
 
-class SeleniumService: SeleniumContext {
+class SeleniumService(
+    private val profilePath: String?,
+    private val implicitWait: Duration = Duration.of(10, ChronoUnit.SECONDS),
+): SeleniumContext {
     private val log = LoggerFactory.getLogger(javaClass)
 
     override lateinit var driver: ChromeDriver
@@ -19,10 +22,10 @@ class SeleniumService: SeleniumContext {
         requireNotNull(System.getProperty("webdriver.chrome.driver")) {
             "Pass the path to the Chrome web driver as a system property: -Dwebdriver.chrome.driver=/path/to/driver"
         }
-        val profile = Path("./chrome-profile").absolutePathString()
+        val profile = profilePath?.let { Path(it).absolutePathString() }
         log.info("Storing Chrome user data in $profile")
-        driver = ChromeDriver(ChromeOptions().apply { addArguments("user-data-dir=$profile") })
-        driver.manage().timeouts().implicitlyWait(Duration.of(10, ChronoUnit.SECONDS))
+        driver = ChromeDriver(ChromeOptions().apply { profile?.let { addArguments("user-data-dir=$it") } })
+        driver.manage().timeouts().implicitlyWait(implicitWait)
         actions = Actions(driver)
     }
 
